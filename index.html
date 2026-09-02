@@ -44,4 +44,8 @@ const oldFit=fit;fit=function(){requestAnimationFrame(()=>{const p=$('#paper'),i
 $('#exportPdf').onclick=()=>{save();fit();setTimeout(()=>{const p=$('#paper'),i=$('#resumeInner'),ratio=(p.clientHeight-4)/i.scrollHeight;if(ratio<.92)return toast('内容过多，需精简后才能保证一页且字号清晰');window.print()},180)};
 const oldLogin=$('#loginBtn').onclick;$('#loginBtn').onclick=()=>{oldLogin();setTimeout(()=>{if(state&&state.sourceText){$('#resumeSource').value=state.sourceText;$('#sourcePreview').textContent=state.sourceText.slice(0,500);$('#sourcePreview').classList.remove('hidden');$('#importStatus').textContent='已加载主简历原文'}setLock(true);fit()},0)};
 })();
+</script><!-- DIRECT_PDF_DOWNLOAD -->
+<script src="vendor/html2canvas.min.js"></script><script src="vendor/jspdf.umd.min.js"></script>
+<script>
+$('#exportPdf').onclick=async()=>{const button=$('#exportPdf'),oldText=button.textContent;try{button.disabled=true;button.textContent='正在生成 PDF…';save();document.documentElement.style.setProperty('--scale','1');const paper=$('#paper');paper.classList.add('compact');await new Promise(r=>setTimeout(r,120));const canvas=await html2canvas(paper,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,width:paper.clientWidth,height:paper.clientHeight});const pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});pdf.addImage(canvas.toDataURL('image/jpeg',.94),'JPEG',0,0,210,297,undefined,'FAST');const name=plain($('[data-field="name"]').innerHTML).trim()||'我的简历';pdf.save(name+'-'+new Date().toISOString().slice(0,10)+'.pdf');toast('PDF 已下载：A4 单页')}catch(error){console.error(error);toast('PDF 生成失败，请刷新页面后重试')}finally{button.disabled=false;button.textContent=oldText;fit()}};
 </script></body></html>
